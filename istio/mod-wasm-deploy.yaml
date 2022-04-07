@@ -6,8 +6,8 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app: testapp
-  url: oci://registry.fi.intel.com/xiangdai/envoy-modsecurity-wasm-plugin:0.1.0
+      app: istio-ingressgateway
+  url: oci://registry.fi.intel.com/staging/modsecurity_wasm:latest
   imagePullPolicy: Always
   pluginConfig:
     "rules_service": rule-service
