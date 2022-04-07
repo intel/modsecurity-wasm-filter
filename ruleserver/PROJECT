@@ -1,0 +1,25 @@
+domain: intel.com
+layout:
+- go.kubebuilder.io/v3
+projectName: ruleserver
+repo: intel.com/ruleserver
+resources:
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: intel.com
+  group: modsecurity
+  kind: Rule
+  path: intel.com/ruleserver/api/v1
+  version: v1
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: intel.com
+  group: modsecurity
+  kind: Config
+  path: intel.com/ruleserver/api/v1
+  version: v1
+version: "3"

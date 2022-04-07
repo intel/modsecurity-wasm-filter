@@ -1,0 +1,59 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  creationTimestamp: null
+  name: manager-role
+rules:
+- apiGroups:
+  - modsecurity.intel.com
+  resources:
+  - configs
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - modsecurity.intel.com
+  resources:
+  - configs/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - modsecurity.intel.com
+  resources:
+  - configs/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - modsecurity.intel.com
+  resources:
+  - rules
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - modsecurity.intel.com
+  resources:
+  - rules/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - modsecurity.intel.com
+  resources:
+  - rules/status
+  verbs:
+  - get
+  - patch
+  - update

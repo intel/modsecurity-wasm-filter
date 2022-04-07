@@ -1,0 +1,13 @@
+apiVersion: modsecurity.intel.com/v1
+kind: Config
+metadata:
+  name: config-sample
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: testapp
+  configs:
+    SecRuleEngine On
+    SecRequestBodyAccess On
+

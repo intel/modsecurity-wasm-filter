@@ -1,0 +1,24 @@
+# permissions for end users to edit rules.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: rule-editor-role
+rules:
+- apiGroups:
+  - modsecurity.intel.com
+  resources:
+  - rules
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - modsecurity.intel.com
+  resources:
+  - rules/status
+  verbs:
+  - get

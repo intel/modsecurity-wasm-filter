@@ -1,0 +1,14 @@
+apiVersion: extensions.istio.io/v1alpha1
+kind: WasmPlugin
+metadata:
+  name: mod-example
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: httpbin
+  url: oci://registry.fi.intel.com/leyao/envoy-modsecurity-wasm-plugin:0.1.0
+  imagePullPolicy: Always
+  pluginConfig:
+    "rules_service": <rules server name>
+    "duration_time": 10
