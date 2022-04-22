@@ -7,9 +7,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends apt-utils ca-ce
     && apt-get autoremove -y \ 
     && apt-get clean \ 
     && apt-get install -y --no-install-recommends \
-        software-properties-common apt-transport-https git wget curl pkg-config \
-        autoconf autotools-dev automake libtool cmake python zlib1g-dev libpcre3 \
-        libpcre3-dev gcc-7 g++-7 cpp-7 gcc python3 python3-distutils \
+    software-properties-common apt-transport-https git wget curl pkg-config \
+    autoconf autotools-dev automake libtool cmake python zlib1g-dev libpcre3 \
+    libpcre3-dev gcc-7 g++-7 cpp-7 gcc python3 python3-distutils \
     && cd $HOME
 
 ENV CC=gcc-7 
@@ -17,9 +17,8 @@ ENV CXX=g++-7
 ENV CPP=cpp-7
 
 WORKDIR /root
-RUN git clone https://github.com/protocolbuffers/protobuf \
+RUN git clone -b v3.9.1 https://github.com/protocolbuffers/protobuf \
     && cd protobuf \
-    && git checkout v3.9.1 \
     && git submodule update --init --recursive \
     && ./autogen.sh \
     && ./configure   \
@@ -30,16 +29,15 @@ RUN git clone https://github.com/protocolbuffers/protobuf \
     && rm -rf protobuf
 
 WORKDIR /root/
-RUN git clone https://github.com/emscripten-core/emsdk.git \ 
+RUN git clone https://github.com/emscripten-core/emsdk.git -b 3.1.8 \ 
     && git clone https://github.com/maxfierke/libpcre.git -b mf-wasm32-wasi-cross-compile \
     && git clone https://github.com/leyao-daily/ModSecurity.git \
-    && git clone https://github.com/abseil/abseil-cpp \
+    && git clone https://github.com/abseil/abseil-cpp -b 20211102.0 \
     && git clone https://github.com/proxy-wasm/proxy-wasm-cpp-sdk \
-    && git clone https://github.com/istio/proxy.git
+    && git clone https://github.com/istio/proxy.git -b 1.13.3
 
 WORKDIR /root/emsdk
-RUN git pull \
-    && ./emsdk install 2.0.7 \ 
+RUN ./emsdk install 2.0.7 \ 
     && ./emsdk activate 2.0.7 \
     && echo "source /root/emsdk/emsdk_env.sh" >> ~/.bashrc \  
     && cd ..
@@ -48,7 +46,7 @@ RUN wget https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-12/w
     && tar xvf wasi-sdk-12.0-linux.tar.gz -C /opt/ \
     && mv /opt/wasi-sdk-12.0/ /opt/wasi-sdk \
     && rm wasi-sdk-12.0-linux.tar.gz 
-    
+
 ENV WASI_SDK_PATH="/opt/wasi-sdk" 
 
 WORKDIR /root/libpcre
@@ -66,9 +64,9 @@ RUN ./build.sh \
     && source ./emsdk_env.sh \
     && cd ~/ModSecurity \
     && emconfigure ./configure --without-yajl --without-geoip --without-libxml --without-curl \
-                               --without-lua --disable-shared --disable-examples --disable-libtool-lock \
-                               --disable-debug-logs  --disable-mutex-on-pm --without-lmdb --without-maxmind \
-                               --without-ssdeep --with-pcre=./pcre-config \
+    --without-lua --disable-shared --disable-examples --disable-libtool-lock \
+    --disable-debug-logs  --disable-mutex-on-pm --without-lmdb --without-maxmind \
+    --without-ssdeep --with-pcre=./pcre-config \
     && emmake make -j 4 \
     && emmake make install \
     && cd ..
@@ -94,6 +92,6 @@ RUN cd ~/emsdk \
     && source ./emsdk_env.sh \
     && cd /build \
     && make 
-    
+
 FROM scratch
 COPY --from=0 /build/envoy-wasm-modsecurity-dynamic.wasm /plugin.wasm
