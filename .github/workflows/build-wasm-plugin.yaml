@@ -1,0 +1,24 @@
+name: Build WASM plugin
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    paths:
+      - "wasmplugin/**"
+
+jobs:
+  build-wasm-plugin:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: ./wasmplugin
+          push: false
+          tags: intel/modsecurity-wasm-filter:latest
