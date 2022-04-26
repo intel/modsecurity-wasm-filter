@@ -40,7 +40,7 @@ jobs:
         run: CGO_ENABLED=0 go build main.go
 
       - name: Run tests
-        run: CGO_ENABLED=1 go test -v ./...
+        run: make test
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
