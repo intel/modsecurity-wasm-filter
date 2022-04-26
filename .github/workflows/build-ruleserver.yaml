@@ -1,12 +1,6 @@
 name: Build Rule server
 
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    paths:
-      - "ruleserver/**"
+on:[]
 
 jobs:
   build-ruleserver:
