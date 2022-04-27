@@ -1,10 +1,20 @@
 name: Build Rule server
 
-on:[]
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    paths:
+      - "ruleserver/**"
+      - ".github/workflows/build-ruleserver.yaml"
 
 jobs:
   build-ruleserver:
     runs-on: ubuntu-20.04
+    defaults:
+      run:
+        working-directory: ./ruleserver
     steps:
       # Set fetch-depth: 0 to fetch commit history and tags for use in version calculation
       - name: Check out code
@@ -26,17 +36,11 @@ jobs:
       - name: download dependencies
         run: go get ./...
 
-      - name: Lint files
-        uses: golangci/golangci-lint-action@v2
-        with:
-          # Required: the version of golangci-lint is required and must be specified without patch version: we always use the latest patch version.
-          version: v1.29
-
       - name: Build server
         run: CGO_ENABLED=0 go build main.go
 
       - name: Run tests
-        run: CGO_ENABLED=1 go test -v ./...
+        run: make test
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
