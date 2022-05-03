@@ -29,27 +29,21 @@ static_resources:
               "@type": type.googleapis.com/envoy.extensions.filters.http.wasm.v3.Wasm
               config:
                 name: "my_plugin"
-                root_id: "my_root_id"
-                # if your wasm filter requires custom configuration you can add
-                # as follows
+                # root_id: "my_root_id"
+                # if your wasm filter requires custom configuration you can add as follows
                 configuration:
                   "@type": "type.googleapis.com/google.protobuf.StringValue"
                   value: |
-                    SecRuleEngine On
-                    SecRule ARGS:param1 "test" "id:1,phase:1,pass,status:200,msg:'Test rule'"
-                    SecRule ARGS:param1 "attack" "id:2,phase:1,deny,status:400,msg:'Test rule'"
+                    {
+                      "rules":"SecRuleEngine On\nSecRule ARGS:param1 \"test\" \"id:1,phase:1,pass,status:200,msg:'Test rule'\"\nSecRule ARGS:param1 \"attack\" \"id:2,phase:1,deny,status:400,msg:'Test rule'\""
+                    }
                 vm_config:
                   runtime: "envoy.wasm.runtime.v8"
                   vm_id: "my_vm_id"
-                  configuration:
-                    "@type": "type.googleapis.com/google.protobuf.StringValue"
-                    value: |
-                      SecRuleEngine On
-                      SecRule ARGS:param1 "test" "id:1,phase:1,pass,status:200,msg:'Test rule'"
-                      SecRule ARGS:param1 "attack" "id:2,phase:1,deny,status:400,msg:'Test rule'"
+
                   code:
                     local:
-                      filename: <wasm_binary_file_location> 
+                      filename: <wasm_binary_file_location>
                         #allow_precompiled: true
           - name: envoy.filters.http.router
             typed_config: {}
