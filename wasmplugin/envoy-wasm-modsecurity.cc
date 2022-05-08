@@ -248,7 +248,6 @@ FilterDataStatus ExampleContext::onRequestBody(size_t body_buffer_length,
 
 FilterHeadersStatus ExampleContext::onResponseHeaders(uint32_t /* headers */, bool end_of_stream) {
   LOG_INFO("************************ onResponseHeaders ***************************");
-  addResponseHeader("X-Wasm-custom", "FOO");
   replaceResponseHeader("content-type", "text/plain; charset=utf-8");
   removeResponseHeader("content-length");
   return getResponseHeadersStatus();
