@@ -2,11 +2,11 @@ apiVersion: modsecurity.intel.com/v1
 kind: Config
 metadata:
   name: config-sample
-  namespace: default
+  namespace: istio-system
 spec:
   selector:
     matchLabels:
-      app: testapp
+      app: istio-ingressgateway
   configs:
     SecRuleEngine On
     SecRequestBodyAccess On

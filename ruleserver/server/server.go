@@ -92,7 +92,16 @@ func (s *Server) ServerHandler() http.HandlerFunc {
 			_, _ = w.Write(nil)
 		}
 
-		response = configList.Items[0].Spec.Configs
+		for _, config := range strings.Split(configList.Items[0].Spec.Configs, "\n") {
+			if strings.Contains(config, "\\") {
+				for _, subconfig := range strings.SplitAfter(config, "\\ ") {
+					response = response + subconfig + "\n"
+				}
+				response += "\n\n"
+			} else {
+				response = response + config + "\n\n"
+			}
+		}
 
 		err = mgrClient.List(context.TODO(), &ruleList, client.InNamespace(namespacedApp.Namespace), client.MatchingFields{controllers.SelectApp: namespacedApp.App})
 		if err != nil {
@@ -101,9 +110,17 @@ func (s *Server) ServerHandler() http.HandlerFunc {
 			_, _ = w.Write(nil)
 		}
 
-		for _, rule := range ruleList.Items {
-			response = response + "\n" + rule.Spec.Rules
+		for _, rule := range strings.Split(ruleList.Items[0].Spec.Rules, "\n") {
+			if strings.Contains(rule, "\\") {
+				for _, subrule := range strings.SplitAfter(rule, "\\ ") {
+					response = response + subrule + "\n"
+				}
+				response += "\n\n"
+			} else {
+				response = response + rule + "\n\n"
+			}
 		}
+
 		_, _ = w.Write([]byte(response))
 	}
 }
