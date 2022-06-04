@@ -7,8 +7,10 @@ spec:
   selector:
     matchLabels:
       app: istio-ingressgateway
-  url: oci://registry.fi.intel.com/staging/modsecurity_wasm:latest
+  url: oci://registry.fi.intel.com/wujiayu/envoy-modsecurity-wasm-dynamic-plugin:latest
   imagePullPolicy: Always
   pluginConfig:
-    "rules_service": rule-service
+    "pod_name": "istio-ingressgateway"
+    "name_space": "istio-system"
+    "rules_service": ruleserver-controller-manager-ruleserver-service
     "duration_time": "30"

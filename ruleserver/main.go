@@ -76,7 +76,7 @@ func main() {
 		Port:                   9443,
 		HealthProbeBindAddress: probeAddr,
 		LeaderElection:         enableLeaderElection,
-		LeaderElectionID:       "mpdsecurity.intel.com",
+		LeaderElectionID:       "modsecurity.intel.com",
 	})
 	if err != nil {
 		setupLog.Error(err, "unable to start manager")
