@@ -7,10 +7,9 @@ We offer a Envoy WASM Plugin integrated with ModSecurity to implement the WAF fu
 The plugin is the basic version and the modsecurity rule inside the plugin can be updated by the istio CR `WasmPlugin`. And we support dynamic update of the wasm binary and modsecurity rules based on istio > 1.13. The rule server for OWASP rules and customer rules will be delivered in the future.
 
 
-
 ### 1. Build and upload wasm plugin:
 
-First, clone the repository and open into `wasmplugin` folder : 
+First, clone the repository and open into `wasmplugin` folder :
 
  ```
  git clone https://github.com/intel/modsecurity-wasm-filter.git 
@@ -27,106 +26,56 @@ Run `docker push` to push the binary to remote repository:
 
 
 
-### 2. Deploy wasm plugin into istio-ingressgateway http filter chain
+### 2. Intall Istio and httpbin example
 
-#### Get binding port for http2
-
-```
-kubectl get svc istio-ingressgateway -n istio-system
-
-NAME                   TYPE       CLUSTER-IP    EXTERNAL-IP   PORT(S)                                      AGE
-istio-ingressgateway   NodePort   $CLUSTER-IP   <none>        15021:31164/TCP,80:30829/TCP,443:30501/TCP   28d
-```
-
-The output here shows that the `istio-ingressgateway` service is forwarding requests from port `80` to port `30829`
-
-Update `/rule-service/rule-service.yaml` to make sure the `nodeport` value of the service be the same with the `istio-ingressgateway` forwarding `nodeport` value.
-
-#### Enable automatic proxy sidecar injection:
-
-`kubectl label namespaces default istio-injection=enabled`
-
-#### Create config map from custom modsecurity.conf
-
-`kubectl create cm rule-configmap --from-file=index.html= rule-example/modsecurity.conf`
-
-
-#### Create rule-service 
-
-`kubectl apply -f rule-service/rule-service.yaml` 
-
-#### Enable wasmplugin
-
-`kubectl apply -f istio/mod-wasm-deploy.yaml`
-
-
-
-### 3. Test modsecurity wasm plugin with istio-ingressgateway
-
-#### Set up ingress ports:
+make sure istioctl verison > 1.13
 
 ```
-export INGRESS_PORT=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.spec.ports[?(@.name=="http2")].nodePort}')
-
-export SECURE_INGRESS_PORT=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.spec.ports[?(@.name=="https")].nodePort}')
-
-export TCP_INGRESS_PORT=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.spec.ports[?(@.name=="tcp")].nodePort}')
-
-export INGRESS_HOST=$(kubectl get po -l istio=ingressgateway -n istio-system -o jsonpath='{.items[0].status.hostIP}')
+istioctl install --set meshConfig.defaultConfig.proxyMetadata.WASM_INSECURE_REGISTRIES=* -y
+kubectl label namespace default istio-injection=enabled
+kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.14/samples/httpbin/httpbin.yaml
+kubectl apply -f https://raw.githubusercontent.com/istio/istio/release-1.14/samples/httpbin/httpbin-gateway.yaml
 ```
 
-#### Create an ingress gateway for the service: 
+
+### 3.  Build and deploy ruleserver controller  
+
+Build ruleserver docker image:
 
 ```
-kubectl apply -f - <<EOF
-apiVersion: networking.istio.io/v1alpha3
-kind: Gateway
-metadata:
-  name: mygateway
-spec:
-  selector:
-    istio: ingressgateway # use Istio default gateway implementation
-  servers:
-  - port:
-      number: 80
-      name: http
-      protocol: HTTP
-    hosts:
-    - "nginx.example.com"
-EOF
+cd modsecurity-wasm-filter/ruleserver
+make docker-build IMG=ruleserver:crd
 ```
 
-#### Create a virtual service for the ingress gateway:
+Deploy controller on kubernetes:
 
 ```
-kubectl apply -f - <<EOF
-apiVersion: networking.istio.io/v1alpha3
-kind: VirtualService
-metadata:
-  name: nginx
-spec:
-  hosts:
-  - "nginx.example.com"
-  gateways:
-  - mygateway
-  http:
-  - match:
-    - uri:
-        prefix: /
-    route:
-    - destination:
-        port:
-          number: 80
-        host: testapp
-EOF
+make deploy IMG=ruleserver:crd
 ```
 
-To confirm the ingress gateway is working properly, using the following command:
+Install CRD on kubernetes:
 
-This should return HTTP 200 OK:
+```
+make install 
+kubectl apply -f config/samples/
+```
 
-`curl -v -HHost:nginx.example.com http://$INGRESS_HOST:$INGRESS_PORT?param1=test`
 
-This should return HTTP 404 Not Found:
+### 4. Test wasm filter
 
-`curl -v -HHost:nginx.example.com http://$INGRESS_HOST:$INGRESS_PORT?param1=attack`
+In another terminal, forward port 80 of istio ingressgateway to port 8080 of local machine
+
+`kubectl port-forward -n istio-system svc/istio-ingressgateway 8080:80`
+
+Send http request to see if the service is working as expected:
+
+`curl -X POST -i http://localhost:8080/post?param1=test` will return HTTP 200 response
+
+`curl -X POST -i http://localhost:8080/post?param1=attack` will return HTTP 400 response
+
+
+
+
+
+
+
