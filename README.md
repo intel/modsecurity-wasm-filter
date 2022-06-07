@@ -28,7 +28,7 @@ Run `docker push` to push the binary to remote repository:
 
 ### 2. Intall Istio and httpbin example
 
-make sure istioctl verison > 1.13
+make sure `istioctl` verison > 1.13
 
 ```
 istioctl install --set meshConfig.defaultConfig.proxyMetadata.WASM_INSECURE_REGISTRIES=* -y
