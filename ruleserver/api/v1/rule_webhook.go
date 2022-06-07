@@ -43,6 +43,7 @@ var _ webhook.Defaulter = &Rule{}
 // Default implements webhook.Defaulter so a webhook will be registered for the type
 func (r *Rule) Default() {
 	rulelog.Info("default", "name", r.Name)
+
 	// Set default rules for Rule CR
 	// Replace all "@pmFromFile" string with "@pm" in rules since “@pmFromFile” action is not supported in WASM
 	if len(r.Spec.Rules) == 0 {
