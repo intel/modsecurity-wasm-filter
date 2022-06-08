@@ -76,7 +76,7 @@ func main() {
 		Port:                   9443,
 		HealthProbeBindAddress: probeAddr,
 		LeaderElection:         enableLeaderElection,
-		LeaderElectionID:       "mpdsecurity.intel.com",
+		LeaderElectionID:       "modsecurity.intel.com",
 	})
 	if err != nil {
 		setupLog.Error(err, "unable to start manager")
@@ -95,6 +95,10 @@ func main() {
 		Scheme: mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "Config")
+		os.Exit(1)
+	}
+	if err = (&modsecurityv1.Rule{}).SetupWebhookWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create webhook", "webhook", "Rule")
 		os.Exit(1)
 	}
 	//+kubebuilder:scaffold:builder

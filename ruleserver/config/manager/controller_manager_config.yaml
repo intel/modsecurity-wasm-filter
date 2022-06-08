@@ -4,6 +4,8 @@ health:
   healthProbeBindAddress: :8081
 metrics:
   bindAddress: :8080
+ruleserver:
+  bindAddress: :8888
 webhook:
   port: 9443
 leaderElection:

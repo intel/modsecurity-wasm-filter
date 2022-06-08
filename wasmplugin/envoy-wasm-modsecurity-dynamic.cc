@@ -59,6 +59,11 @@ private:
 
   // unit: second
   std::string duration_time_;
+
+  // URL path which configured in the rule server  
+  std::string namespace_;
+  std::string pod_name_;
+  std::string path_;
 };
 
 class ExampleContext : public Context {
@@ -154,7 +159,7 @@ bool ExampleRootContext::onConfigure(size_t configuration_size) {
       return false;
     }
     char buffer[100];
-    sprintf(buffer, "outbound|80||%s.default.svc.cluster.local",
+    sprintf(buffer, "outbound|8888||%s.ruleserver-system.svc.cluster.local",
             rules_service.first.value().c_str());
     rules_service_ = std::string(buffer);
   } else {
@@ -182,6 +187,42 @@ bool ExampleRootContext::onConfigure(size_t configuration_size) {
     return false;
   }
   proxy_set_tick_period_milliseconds(std::stoi(duration_time_) * 1000);
+
+  it = j.find("name_space");
+  if (it != j.end()){
+    auto name_space = JsonValueAs<std::string>(it.value());
+    if (name_space.second != Wasm::Common::JsonParserResultDetail::OK) {
+      LOG_WARN(absl::StrCat(
+          "cannot parse namespace in plugin configuration JSON string: ",
+          configuration_data->view()));
+      return false;
+    }
+    namespace_ = name_space.first.value().c_str();
+  } else {
+    LOG_WARN(absl::StrCat("namespace must be provided in plugin "
+                          "configuration JSON string: ",
+                          configuration_data->view()));
+    return false;
+  }
+
+  it = j.find("pod_name");
+  if (it != j.end()){
+    auto pod_name = JsonValueAs<std::string>(it.value());
+    if (pod_name.second != Wasm::Common::JsonParserResultDetail::OK) {
+      LOG_WARN(absl::StrCat(
+          "cannot parse pod name in plugin configuration JSON string: ",
+          configuration_data->view()));
+      return false;
+    }
+    pod_name_ = pod_name.first.value().c_str();
+  } else {
+    LOG_WARN(absl::StrCat("pod name must be provided in plugin "
+                          "configuration JSON string: ",
+                          configuration_data->view()));
+    return false;
+  }
+  path_ = "/" + namespace_ + "/" + pod_name_;
+  LOG_INFO("URL path: " + path_);
 
   update_flag_ = true;
   if (updateRules() != true) {
@@ -556,8 +597,8 @@ bool ExampleRootContext::updateRules() {
   };
 
   auto r = httpCall(rules_service_,
-                    {{":method", "GET"}, {":path", "/"}, {":authority", "foo"}},
-                    "", {}, 1000, callback);
+                  {{":method", "GET"}, {":path", path_}, {":authority", "modsecurity_wasm"}},
+                  "", {}, 1000, callback);
   if (r != WasmResult::Ok) {
     LOG_WARN("failed to get rules");
     return false;
