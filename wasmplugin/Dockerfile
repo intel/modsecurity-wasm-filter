@@ -10,6 +10,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends apt-utils ca-ce
     software-properties-common apt-transport-https git wget curl pkg-config \
     autoconf autotools-dev automake libtool cmake python zlib1g-dev libpcre3 \
     libpcre3-dev gcc-7 g++-7 cpp-7 gcc python3 python3-distutils \
+    && rm -rf /var/lib/apt/lists/* \
     && cd $HOME
 
 ENV CC=gcc-7 
