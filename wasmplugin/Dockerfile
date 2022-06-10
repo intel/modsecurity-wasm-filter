@@ -32,7 +32,7 @@ RUN git clone -b v3.9.1 https://github.com/protocolbuffers/protobuf \
 WORKDIR /root/
 RUN git clone https://github.com/emscripten-core/emsdk.git -b 3.1.8 \ 
     && git clone https://github.com/maxfierke/libpcre.git -b mf-wasm32-wasi-cross-compile \
-    && git clone https://github.com/leyao-daily/ModSecurity.git \
+    && git clone https://github.com/daixiang0/ModSecurity.git -b wasm \
     && git clone https://github.com/abseil/abseil-cpp -b 20211102.0 \
     && git clone https://github.com/proxy-wasm/proxy-wasm-cpp-sdk \
     && git clone https://github.com/istio/proxy.git -b 1.13.3
