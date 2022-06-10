@@ -87,7 +87,7 @@ RUN mv proxy istio-proxy \
     && cd ..
 
 WORKDIR /root
-ADD Dockerfile Makefile envoy-wasm-modsecurity-dynamic.cc utils.cc utils.h /build/ 
+ADD Makefile envoy-wasm-modsecurity-dynamic.cc utils.cc utils.h /build/ 
 
 RUN cd ~/emsdk \
     && source ./emsdk_env.sh \
