@@ -6,20 +6,86 @@ on:
       - main
   pull_request:
     paths:
+      - "e2e"
       - "wasmplugin/**"
       - ".github/workflows/build-wasm-plugin.yaml"
 
 jobs:
-  build-wasm-plugin:
+  build-wasm-plugin-dynamic:
     runs-on: ubuntu-20.04
     steps:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
+      # In this step, this action saves a list of existing images,
+      # the cache is created without them in the post run.
+      # It also restores the cache if it exists.
+
       - name: Build and push
         uses: docker/build-push-action@v2
         with:
           context: "{{defaultContext}}:wasmplugin"
           push: false
           tags: intel/modsecurity-wasm-filter:latest
+
+  build-wasm-plugin-static:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      # In this step, this action saves a list of existing images,
+      # the cache is created without them in the post run.
+      # It also restores the cache if it exists.
+      - uses: satackey/action-docker-layer-caching@v0.0.11
+        # Ignore the failure of a step and avoid terminating the job.
+        continue-on-error: true
+
+      - name: "Cache generated .wasm file"
+        uses: actions/cache@v3
+        with:
+          path: |
+            e2e/build/
+          key: wasm-module-build-${{ github.sha }}
+
+      - name: "Build wasm module"
+        shell: bash
+        run: make -C e2e build-wasm-plugin-static extract-wasm-plugin-static
+
+  e2e-test-wasm-plugin-static:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: "Install func-e"
+        shell: bash
+        run: curl https://func-e.io/install.sh | bash -s -- -b /usr/local/bin
+
+      - name: "Restore the wasm files cache"
+        uses: actions/cache@v3
+        with:
+          path: |
+            e2e/build/
+          key: wasm-module-build-${{ github.sha }}
+
+      - name: "Spin up envoy"
+        shell: bash
+        run: |
+          func-e run -c e2e/envoy-config.yaml --log-level info --component-log-level wasm:debug &
+
+      - name: "Run local tests"
+        env:
+          HEALTH_URL: "http://localhost:8001"
+          REQ_UNFILTERED: "http://localhost:8001/home"
+          REQ_FILTERED: "http://localhost:8001/admin"
+        shell: bash
+        run: |
+          ./e2e/tests.sh
