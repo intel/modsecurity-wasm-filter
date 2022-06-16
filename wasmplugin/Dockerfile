@@ -32,7 +32,7 @@ RUN git clone -b v3.9.1 https://github.com/protocolbuffers/protobuf \
 WORKDIR /root/
 RUN git clone https://github.com/emscripten-core/emsdk.git -b 3.1.8 \ 
     && git clone https://github.com/maxfierke/libpcre.git -b mf-wasm32-wasi-cross-compile \
-    && git clone https://github.com/daixiang0/ModSecurity.git -b wasm \
+    && git clone https://github.com/SpiderLabs/ModSecurity.git -b v3/dev/wasm-experimental \
     && git clone https://github.com/abseil/abseil-cpp -b 20211102.0 \
     && git clone https://github.com/proxy-wasm/proxy-wasm-cpp-sdk \
     && git clone https://github.com/istio/proxy.git -b 1.13.3
@@ -67,7 +67,7 @@ RUN ./build.sh \
     && emconfigure ./configure --without-yajl --without-geoip --without-libxml --without-curl \
     --without-lua --disable-shared --disable-examples --disable-libtool-lock \
     --disable-debug-logs  --disable-mutex-on-pm --without-lmdb --without-maxmind \
-    --without-ssdeep --with-pcre=./pcre-config \
+    --without-ssdeep --without-pcre2 --with-pcre=./pcre-config \
     && emmake make -j 4 \
     && emmake make install \
     && cd ..
