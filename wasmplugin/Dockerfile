@@ -33,7 +33,7 @@ RUN git clone -b v3.9.1 https://github.com/protocolbuffers/protobuf \
 ARG MODSEC_SHA=a3454df9b09a8de16d41be10cdea4fc46ef08e91
 
 WORKDIR /root/
-RUN git clone https://github.com/emscripten-core/emsdk.git -b 3.1.8 \ 
+RUN git clone https://github.com/emscripten-core/emsdk.git -b 3.1.15 \ 
     && git clone https://github.com/maxfierke/libpcre.git -b mf-wasm32-wasi-cross-compile \
     && git clone https://github.com/SpiderLabs/ModSecurity.git \
     && git -C ModSecurity checkout $MODSEC_SHA \
