@@ -30,7 +30,7 @@ RUN git clone -b v3.9.1 https://github.com/protocolbuffers/protobuf \
     && rm -rf protobuf
 
 WORKDIR /root/
-RUN git clone https://github.com/emscripten-core/emsdk.git -b 3.1.8 \ 
+RUN git clone https://github.com/emscripten-core/emsdk.git -b 3.1.15 \ 
     && git clone https://github.com/maxfierke/libpcre.git -b mf-wasm32-wasi-cross-compile \
     && git clone https://github.com/daixiang0/ModSecurity.git -b wasm \
     && git clone https://github.com/abseil/abseil-cpp -b 20211102.0 \
