@@ -5,7 +5,7 @@ EXTRACT_CONTAINER_NAME=modsecurity-wasm-filter-static-extract
 build-wasm-plugin-static:
 	sed -i 's/envoy-wasm-modsecurity-dynamic/envoy-wasm-modsecurity/' ../wasmplugin/Dockerfile
 	sed -i 's/envoy-wasm-modsecurity-dynamic/envoy-wasm-modsecurity/' ../wasmplugin/Makefile
-	docker build --platform linux/amd64 -t $(IMAGE_NAME):$(IMAGE_VERSION) -f ../wasmplugin/Dockerfile ../wasmplugin --build-arg MODSEC_SHA=a3454df9b09a8de16d41be10cdea4fc46ef08e91 
+	docker build --platform linux/amd64 -t $(IMAGE_NAME):$(IMAGE_VERSION) -f ../wasmplugin/Dockerfile ../wasmplugin
 	# Go back to old state
 	cd ../wasmplugin; git checkout .
 
