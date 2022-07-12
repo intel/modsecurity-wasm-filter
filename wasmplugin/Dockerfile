@@ -29,10 +29,14 @@ RUN git clone -b v3.9.1 https://github.com/protocolbuffers/protobuf \
     && cd .. \
     && rm -rf protobuf
 
+ARG MODSEC_SHA=a3454df9b09a8de16d41be10cdea4fc46ef08e91
+
 WORKDIR /root/
 RUN git clone https://github.com/emscripten-core/emsdk.git -b 3.1.8 \ 
     && git clone https://github.com/maxfierke/libpcre.git -b mf-wasm32-wasi-cross-compile \
-    && git clone https://github.com/SpiderLabs/ModSecurity.git -b v3/dev/wasm-experimental \
+    && git clone https://github.com/SpiderLabs/ModSecurity.git \
+    && cd ModSecurity \
+    && git checkout $MODSEC_SHA \
     && git clone https://github.com/abseil/abseil-cpp -b 20211102.0 \
     && git clone https://github.com/proxy-wasm/proxy-wasm-cpp-sdk \
     && git clone https://github.com/istio/proxy.git -b 1.13.3
