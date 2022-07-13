@@ -1,4 +1,4 @@
-FROM ubuntu:bionic
+FROM arm64v8/ubuntu:bionic
 # basics
 SHELL ["/bin/bash", "-c"] 
 ARG http_proxy 
