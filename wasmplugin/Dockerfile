@@ -42,7 +42,7 @@ RUN git clone https://github.com/emscripten-core/emsdk.git -b 3.1.15 \
     && git clone https://github.com/istio/proxy.git -b 1.13.3
 
 WORKDIR /root/emsdk
-RUN ./emsdk install 3.1.17 \ 
+RUN ./emsdk install 3.1.7 \ 
     && ./emsdk activate 3.1.7 \
     && echo "source /root/emsdk/emsdk_env.sh" >> ~/.bashrc \  
     && cd ..
