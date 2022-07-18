@@ -34,7 +34,7 @@ ARG MODSEC_SHA=a3454df9b09a8de16d41be10cdea4fc46ef08e91
 
 WORKDIR /root/
 RUN git clone https://github.com/emscripten-core/emsdk.git -b 3.1.15 \ 
-    && git clone https://github.com/maxfierke/libpcre.git -b mf-wasm32-wasi-cross-compile \
+    && git clone https://github.com/leyao-daily/pcre2.git \
     && git clone https://github.com/SpiderLabs/ModSecurity.git \
     && git -C ModSecurity checkout $MODSEC_SHA \
     && git clone https://github.com/abseil/abseil-cpp -b 20211102.0 \
@@ -42,8 +42,8 @@ RUN git clone https://github.com/emscripten-core/emsdk.git -b 3.1.15 \
     && git clone https://github.com/istio/proxy.git -b 1.13.3
 
 WORKDIR /root/emsdk
-RUN ./emsdk install 2.0.7 \ 
-    && ./emsdk activate 2.0.7 \
+RUN ./emsdk install 3.1.7 \ 
+    && ./emsdk activate 3.1.7 \
     && echo "source /root/emsdk/emsdk_env.sh" >> ~/.bashrc \  
     && cd ..
 
@@ -56,9 +56,10 @@ ENV WASI_SDK_PATH="/opt/wasi-sdk"
 
 WORKDIR /root/libpcre
 RUN autoreconf -ivf \
-    && ./build_for_crystal.sh wasm32-wasi \
+    && source "/root/emsdk/emsdk_env.sh" \
+    && ./build_for_wasm.sh wasm32-emscripten \
     && mkdir /usr/local/pcre \
-    && cp targets/wasm32-wasi/*.a /usr/local/pcre \
+    && cp targets/wasm32-emscripten/*.a /usr/local/pcre \
     && cd .. 
 
 WORKDIR /root/ModSecurity
@@ -71,7 +72,7 @@ RUN ./build.sh \
     && emconfigure ./configure --without-yajl --without-geoip --without-libxml --without-curl \
     --without-lua --disable-shared --disable-examples --disable-libtool-lock \
     --disable-debug-logs  --disable-mutex-on-pm --without-lmdb --without-maxmind \
-    --without-ssdeep --without-pcre2 --with-pcre=./pcre-config \
+    --without-ssdeep --with-pcre2 \
     && emmake make -j 4 \
     && emmake make install \
     && cd ..
