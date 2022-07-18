@@ -893,7 +893,7 @@ index 00000000..1afadf87
 +      ;;
 +    --libs)
 +      if test yes = yes ; then
-+        echo $libS$libR -lpcre -L/usr/local/pcre
++        echo $libS$libR -lpcre -L/usr/local/pcre2
 +      else
 +        echo "${usage}" 1>&2
 +      fi

@@ -54,12 +54,12 @@ RUN wget https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-12/w
 
 ENV WASI_SDK_PATH="/opt/wasi-sdk" 
 
-WORKDIR /root/libpcre
+WORKDIR /root/pcre2
 RUN autoreconf -ivf \
     && source "/root/emsdk/emsdk_env.sh" \
     && ./build_for_wasm.sh wasm32-emscripten \
-    && mkdir /usr/local/pcre \
-    && cp targets/wasm32-emscripten/*.a /usr/local/pcre \
+    && mkdir -p /usr/local/pcre2 \
+    && cp targets/wasm32-emscripten/*.a /usr/local/pcre2 \
     && cd .. 
 
 WORKDIR /root/ModSecurity

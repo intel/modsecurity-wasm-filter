@@ -6,7 +6,7 @@ CPP_CONTEXT_LIB = ${CPP_API}/proxy_wasm_intrinsics.cc
 ABSL = /root/abseil-cpp
 ABSL_CPP = ${ABSL}/absl/strings/str_cat.cc ${ABSL}/absl/strings/str_split.cc ${ABSL}/absl/strings/numbers.cc ${ABSL}/absl/strings/ascii.cc
 MODSECURITY = /usr/local/modsecurity/
-PCRE = /usr/local/pcre/
+PCRE = /usr/local/pcre2/
 ISTIO_PROXY = /root/istio-proxy
 JSON_UTIL = /root/istio-proxy/extensions/common/wasm
 
