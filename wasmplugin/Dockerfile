@@ -33,8 +33,8 @@ RUN git clone -b v3.9.1 https://github.com/protocolbuffers/protobuf \
 ARG MODSEC_SHA=a3454df9b09a8de16d41be10cdea4fc46ef08e91
 
 WORKDIR /root/
-RUN git clone https://github.com/emscripten-core/emsdk.git -b 3.1.15 \ 
-    && git clone https://github.com/maxfierke/libpcre.git -b mf-wasm32-wasi-cross-compile \
+RUN git clone https://github.com/emscripten-core/emsdk.git -b 3.1.16 \ 
+    && git clone https://github.com/M4tteoP/libpcre.git -b wasm-emscripten \
     && git clone https://github.com/SpiderLabs/ModSecurity.git \
     && git -C ModSecurity checkout $MODSEC_SHA \
     && git clone https://github.com/abseil/abseil-cpp -b 20211102.0 \
@@ -42,23 +42,17 @@ RUN git clone https://github.com/emscripten-core/emsdk.git -b 3.1.15 \
     && git clone https://github.com/istio/proxy.git -b 1.13.3
 
 WORKDIR /root/emsdk
-RUN ./emsdk install 2.0.7 \ 
-    && ./emsdk activate 2.0.7 \
+RUN ./emsdk install 3.1.16 \ 
+    && ./emsdk activate 3.1.16 \
     && echo "source /root/emsdk/emsdk_env.sh" >> ~/.bashrc \  
     && cd ..
 
-RUN wget https://github.com/WebAssembly/wasi-sdk/releases/download/wasi-sdk-12/wasi-sdk-12.0-linux.tar.gz \
-    && tar xvf wasi-sdk-12.0-linux.tar.gz -C /opt/ \
-    && mv /opt/wasi-sdk-12.0/ /opt/wasi-sdk \
-    && rm wasi-sdk-12.0-linux.tar.gz 
-
-ENV WASI_SDK_PATH="/opt/wasi-sdk" 
-
 WORKDIR /root/libpcre
 RUN autoreconf -ivf \
-    && ./build_for_crystal.sh wasm32-wasi \
+    && source "/root/emsdk/emsdk_env.sh" \
+    && ./build_for_wasm.sh wasm32-emscripten \
     && mkdir /usr/local/pcre \
-    && cp targets/wasm32-wasi/*.a /usr/local/pcre \
+    && cp targets/wasm32-emscripten/*.a /usr/local/pcre \
     && cd .. 
 
 WORKDIR /root/ModSecurity
@@ -79,6 +73,22 @@ RUN ./build.sh \
 WORKDIR /root/proxy-wasm-cpp-sdk
 RUN mkdir /build /sdk \
     && cp *.cc *.h *.js *.proto Makefile* *.a /sdk/ 
+
+WORKDIR /root
+RUN source "/root/emsdk/emsdk_env.sh" \
+    && git clone https://github.com/protocolbuffers/protobuf -b v3.9.1 protobuf-wasm \
+    && cd protobuf-wasm \
+    && git clone https://github.com/kwonoj/protobuf-wasm wasm-patches \
+    && cd wasm-patches \
+    && git checkout 4bba8b2f38b5004f87489642b6ca4525ae72fe7f \
+    && cd .. \
+    && git apply wasm-patches/*.patch \
+    && ./autogen.sh \
+    && emconfigure ./configure --disable-shared CXXFLAGS="-O3 -flto" \
+    && emmake make \
+    && cd .. \
+    && cp protobuf-wasm/src/.libs/libprotobuf-lite.a /sdk/libprotobuf-lite.a \
+    && cp protobuf-wasm/src/.libs/libprotobuf.a /sdk/libprotobuf.a
 
 WORKDIR /root 
 RUN wget -O /usr/local/bin/bazel https://github.com/bazelbuild/bazelisk/releases/latest/download/bazelisk-linux-amd64 \
