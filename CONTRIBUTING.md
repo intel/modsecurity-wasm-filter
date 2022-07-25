@@ -2,7 +2,7 @@
 
 ### License
 
-<PROJECT NAME> is licensed under the terms in [Apache 2.0]<https://github.com/intel/modsecurity-wasm-filter/blob/main/LICENSE>. By contributing to the project, you agree to the license and copyright terms therein and release your contribution under these terms.
+<PROJECT NAME> is licensed under the terms in [Apache 2.0](https://github.com/intel/modsecurity-wasm-filter/blob/main/LICENSE). By contributing to the project, you agree to the license and copyright terms therein and release your contribution under these terms.
 
 ### Sign your work
 
