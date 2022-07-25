@@ -16,7 +16,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends apt-utils ca-ce
 ENV CC=gcc-7 
 ENV CXX=g++-7
 ENV CPP=cpp-7
-
+#
 WORKDIR /root
 RUN git clone -b v3.9.1 https://github.com/protocolbuffers/protobuf \
     && cd protobuf \
