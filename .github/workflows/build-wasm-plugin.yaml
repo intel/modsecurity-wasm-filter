@@ -30,6 +30,22 @@ jobs:
           push: false
           tags: intel/modsecurity-wasm-filter:latest
 
+      - name: Login to the container registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io/${{ github.repository }}
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push image to GHCR
+        if: ${{ github.event_name != 'pull_request' }}
+        uses: docker/build-push-action@v2
+        with:
+          context: "{{defaultContext}}:wasmplugin"
+          push: true
+          tags: ghcr.io/${{ github.repository }}/modsecurity-wasm-filter:latest
+
+
   build-wasm-plugin-static:
     runs-on: ubuntu-latest
     steps:
