@@ -242,21 +242,109 @@ FilterDataStatus ExampleContext::onRequestBody(size_t body_buffer_length,
                                                bool end_of_stream) {
 
   LOG_INFO("************************ onRequestBody ***************************");
-  return getRequestStatus();
 
+  if (status_.intervined || status_.request_processed) {
+    LOG_INFO("Processed");
+    return getRequestStatus();
+  }
+  auto body =
+      getBufferBytes(WasmBufferType::HttpRequestBody, 0, body_buffer_length);
+  LOG_INFO(std::string(body->view()));
+
+  // size_t responseLen = modsec_transaction_->getResponseBodyLength();
+  std::vector<unsigned char> data(body->data(), body->data() + body->size());
+  const unsigned char *dataptr = data.data();
+  if (modsec_transaction_->appendRequestBody(dataptr, body->size()) == false) {
+    LOG_INFO(
+        "ModSecurityFilter::onRequestBody appendRequestBody reached limit");
+    if (intervention()) {
+      return FilterDataStatus::StopIterationNoBuffer;
+    }
+    // Otherwise set to process response
+    end_of_stream = true;
+  }
+
+  if (end_of_stream) {
+    LOG_INFO(std::string("request processed"));
+    status_.request_processed = true;
+    modsec_transaction_->processRequestBody();
+    LOG_INFO("ModSecurityFilter::onRequestBody processRequestBody done");
+  }
+  if (intervention()) {
+    return FilterDataStatus::StopIterationNoBuffer;
+  }
+
+  return getRequestStatus();
 }
 
 FilterHeadersStatus ExampleContext::onResponseHeaders(uint32_t /* headers */, bool end_of_stream) {
   LOG_INFO("************************ onResponseHeaders ***************************");
-  replaceResponseHeader("content-type", "text/plain; charset=utf-8");
-  removeResponseHeader("content-length");
+
+  if (status_.intervined || status_.response_processed) {
+    return getResponseHeadersStatus();
+  }
+
+  auto headers = getResponseHeaderPairs();
+  auto pairs = headers->pairs();
+  for (auto &p : pairs) {
+    LOG_INFO(std::string(p.first) + std::string(" -> ") +
+             std::string(p.second));
+    modsec_transaction_->addResponseHeader(std::string(p.first),
+                                           std::string(p.second));
+  }
+  int response_code;
+  std::string protocol;
+  getValue({"response", "code"}, &response_code);
+  getValue({"request", "protocol"}, &protocol);
+  // TODO(luyao): get response protocol
+  LOG_INFO("modsecurity processResponseHeaders start");
+  modsec_transaction_->processResponseHeaders(response_code, protocol.c_str());
+  LOG_INFO("modsecurity processResponseHeaders done");
+
+  if (end_of_stream) {
+    LOG_INFO(std::string("response processed"));
+    status_.response_processed = true;
+  }
+  if (intervention()) {
+    LOG_INFO(std::string("stop iteration"));
+    return FilterHeadersStatus::StopIteration;
+  }
+  LOG_INFO(std::string("getResponseHeadersStatus"));
   return getResponseHeadersStatus();
 }
 
 FilterDataStatus ExampleContext::onResponseBody(size_t body_buffer_length,
                                                 bool end_of_stream) {
-    LOG_INFO("************************ onResponseBody ***************************");
+  LOG_INFO("************************ onResponseBody ***************************");
+  
+  if (status_.intervined || status_.response_processed) {
+    LOG_INFO("Processed");
     return getResponseStatus();
+  }
+  auto body =
+      getBufferBytes(WasmBufferType::HttpResponseBody, 0, body_buffer_length);
+  LOG_INFO(std::string(body->view()));
+
+  // size_t responseLen = modsec_transaction_->getResponseBodyLength();
+  std::vector<unsigned char> data(body->data(), body->data() + body->size());
+  const unsigned char *dataptr = data.data();
+  if (modsec_transaction_->appendResponseBody(dataptr, body->size()) == false) {
+    LOG_INFO(
+        "ModSecurityFilter::onResponseBody appendResponseBody reached limit");
+    if (intervention()) {
+      return FilterDataStatus::StopIterationNoBuffer;
+    }
+    // Otherwise set to process response
+    end_of_stream = true;
+  }
+  if (end_of_stream) {
+    status_.response_processed = true;
+    modsec_transaction_->processResponseBody();
+  }
+  if (intervention()) {
+    return FilterDataStatus::StopIterationNoBuffer;
+  }
+  return getResponseStatus();
 }
 
 FilterMetadataStatus ExampleContext::onRequestMetadata(uint32_t) {
