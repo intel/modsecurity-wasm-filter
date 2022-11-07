@@ -30,7 +30,7 @@ RUN git clone -b v3.9.1 https://github.com/protocolbuffers/protobuf \
     && rm -rf protobuf
 
 # Commit from SpiderLabs/ModSecurity repository, aiming at v3/dev/wasm-experimental branch
-ARG MODSEC_SHA=a3454df9b09a8de16d41be10cdea4fc46ef08e91
+ARG MODSEC_SHA=a68a2c7199b680b09a1cb7b0197bc3a1889512d2
 
 WORKDIR /root/
 RUN git clone https://github.com/emscripten-core/emsdk.git -b 3.1.16 \ 
