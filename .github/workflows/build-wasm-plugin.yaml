@@ -9,6 +9,10 @@ on:
       - "e2e"
       - "wasmplugin/**"
       - ".github/workflows/build-wasm-plugin.yaml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   build-wasm-plugin-dynamic:
