@@ -8,6 +8,10 @@ on:
     paths:
       - "ruleserver/**"
       - ".github/workflows/build-ruleserver.yaml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   build-ruleserver:
