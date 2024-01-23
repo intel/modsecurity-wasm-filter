@@ -11,13 +11,13 @@ on:
       - ".github/workflows/build-wasm-plugin.yaml"
   workflow_dispatch:
 
-permissions:
-  contents: read
-  packages: write
+permissions: {}
 
 jobs:
   build-wasm-plugin-dynamic:
     runs-on: ubuntu-20.04
+    permissions:
+      packages: write
     steps:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
@@ -53,6 +53,7 @@ jobs:
 
   build-wasm-plugin-static:
     runs-on: ubuntu-latest
+    permissions: {}
     steps:
       - name: "Checkout"
         uses: actions/checkout@v3
